@@ -1,0 +1,83 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "darwin", "debian-openssl-3.0.x", "debian-openssl-1.1.x"]
+  output        = "../libs/prisma/client/src/lib"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum TaskEnvironment {
+  PRODUCTION
+  DEVELOPMENT
+  STAGING
+  LOCAL
+  TEST
+}
+
+enum TaskState {
+  PENDING
+  IN_PROGRESS
+  DONE
+  ERROR
+}
+
+enum SubtaskState {
+  IN_PROGRESS
+  DONE
+  ERROR
+  STOPPED
+}
+
+model Subtask {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  taskId String @db.ObjectId
+
+  name     String
+  message  String?
+  progress Int?
+  data     Json?
+  state    SubtaskState @default(IN_PROGRESS)
+
+  createdAt  DateTime  @default(now())
+  finishedAt DateTime?
+
+  Task PrismaTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+model PrismaTask {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  parentId String? @db.ObjectId
+
+  meta    Json  @default("{}")
+  payload Json?
+
+  createdAt   DateTime  @default(now())
+  initiatedAt DateTime  @default(now())
+  stoppedAt   DateTime?
+  startedAt   DateTime?
+  finishedAt  DateTime?
+
+  environment TaskEnvironment
+
+  service String
+  type    String
+  subtype String?
+
+  state    TaskState @default(PENDING)
+  progress Int       @default(0)
+  message  String    @default("")
+
+  error Json?
+  retry Int   @default(0)
+
+  userId String? @db.ObjectId
+
+  actions  Subtask[]
+  children PrismaTask[] @relation("ParentTask")
+  parent   PrismaTask?  @relation("ParentTask", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map(name: "Task")
+}

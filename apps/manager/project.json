@@ -1,0 +1,65 @@
+{
+  "name": "manager",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/manager/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/manager",
+        "main": "apps/manager/src/main.ts",
+        "tsConfig": "apps/manager/tsconfig.app.json",
+        "assets": [
+          "apps/manager/src/assets"
+        ],
+        "isolatedConfig": true,
+        "webpackConfig": "apps/manager/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "manager:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "manager:build:development"
+        },
+        "production": {
+          "buildTarget": "manager:build:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "apps/manager/**/*.ts"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "options": {
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/apps/manager"
+      }
+    }
+  },
+  "tags": []
+}

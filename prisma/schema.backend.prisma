@@ -1,0 +1,18 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "darwin", "debian-openssl-3.0.x", "debian-openssl-1.1.x"]
+  output        = "../libs/prisma/backend/src/lib"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+}
